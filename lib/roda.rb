@@ -34,7 +34,7 @@ class Roda
   # Base class used for Roda requests.  The instance methods for this
   # class are added by Roda::RodaPlugins::Base::RequestMethods, the
   # class methods are added by Roda::RodaPlugins::Base::RequestClassMethods.
-  class RodaRequest < ::Rack::Request
+  class RodaRequest
     @roda_class = ::Roda
     @match_pattern_cache = ::Roda::RodaCache.new
   end
@@ -205,17 +205,6 @@ class Roda
           build_rack_app
         end
 
-        private
-
-        # Build the rack app to use
-        def build_rack_app
-          if block = @route_block
-            builder = Rack::Builder.new
-            @middleware.each{|a, b| builder.use(*a, &b)}
-            builder.run lambda{|env| new(env).call(&block)}
-            @app = builder.to_app
-          end
-        end
       end
 
       # Instance methods for the Roda class.
@@ -227,9 +216,9 @@ class Roda
       # response :: The instance of the response class related to this request.
       module InstanceMethods
         # Create a request and response of the appropriate class
-        def initialize(env)
+        def initialize(request)
           klass = self.class
-          @_request = klass::RodaRequest.new(self, env)
+          @_request = klass::RodaRequest.new(self, request)
           @_response = klass::RodaResponse.new
         end
 
@@ -347,11 +336,11 @@ class Roda
         attr_reader :scope
 
         # Store the roda instance and environment.
-        def initialize(scope, env)
+        def initialize(scope, request)
           @scope = scope
           @captures = []
-          @remaining_path = _remaining_path(env)
-          super(env)
+          @remaining_path = _remaining_path(request)
+          @__request = request
         end
 
         # Handle match block return values.  By default, if a string is given
@@ -367,7 +356,7 @@ class Roda
         # requests, otherwise, matches only GET requests where the arguments
         # given fully consume the path.
         def get(*args, &block)
-          _verb(args, &block) if is_get?
+          _verb(args, &block) if get?
         end
 
         # Immediately stop execution of the route block and return the given
@@ -390,7 +379,7 @@ class Roda
         #   r.inspect
         #   # => '#<Roda::RodaRequest GET /foo/bar>'
         def inspect
-          "#<#{self.class.inspect} #{@env[REQUEST_METHOD]} #{path}>"
+          "#<#{self.class.inspect} #{verb} #{path}>"
         end
 
         # Does a terminal match on the current path, matching only if the arguments
@@ -450,9 +439,9 @@ class Roda
         # Optimized method for whether this request is a +GET+ request.
         # Similar to the default Rack::Request get? method, but can be
         # overridden without changing rack's behavior.
-        def is_get?
-          @env[REQUEST_METHOD] == GET_REQUEST_METHOD
-        end
+        #def is_get?
+        #  verb == GET_REQUEST_METHOD
+        #end
 
         # Does a match on the path, matching only if the arguments
         # have matched the path.  Because this doesn't fully match the
@@ -491,8 +480,7 @@ class Roda
 
         # The already matched part of the path, including the original SCRIPT_NAME.
         def matched_path
-          e = @env
-          e[SCRIPT_NAME] + e[PATH_INFO].chomp(@remaining_path)
+          path.chomp(@remaining_path)
         end
 
         # This an an optimized version of Rack::Request#path.
@@ -613,7 +601,7 @@ class Roda
         # Use <tt>r.get true</tt> to handle +GET+ requests where the current
         # path is empty.
         def root(&block)
-          if remaining_path == SLASH && is_get?
+          if remaining_path == SLASH && get?
             always(&block)
           end
         end
@@ -630,26 +618,18 @@ class Roda
         # before dispatching to another rack app, so the app still works as
         # a URL mapper.
         def run(app)
-          e = @env
+          e = @__request.env
           path = real_remaining_path
-          sn = SCRIPT_NAME
-          pi = PATH_INFO
-          script_name = e[sn]
-          path_info = e[pi]
+          script_name = script_name()
+          path_info = path_info()
           begin
-            e[sn] += path_info.chomp(path)
-            e[pi] = path
+            self.script_name= script_name + path_info.chomp(path)
+            self.path_info= path
             throw :halt, app.call(e)
           ensure
-            e[sn] = script_name
-            e[pi] = path_info
+            self.script_name= script_name
+            self.path_info= path_info
           end
-        end
-
-        # The session for the current request.  Raises a RodaError if
-        # a session handler has not been loaded.
-        def session
-          @env[SESSION_KEY] || raise(RodaError, "You're missing a session handler. You can get started by adding use Rack::Session::Cookie")
         end
 
         private
@@ -729,8 +709,8 @@ class Roda
         end
 
         # The base remaining path to use.
-        def _remaining_path(env)
-          env[PATH_INFO]
+        def _remaining_path(request)
+          request.path_info
         end
 
         # Backbone of the verb method support, using a terminal match if
@@ -779,7 +759,7 @@ class Roda
         # If the current request is a GET request, raise an error, as otherwise
         # it is easy to create an infinite redirect.
         def default_redirect_path
-          raise RodaError, "must provide path argument to redirect for get requests" if is_get?
+          raise RodaError, "must provide path argument to redirect for get requests" if get?
           path
         end
 
@@ -846,7 +826,7 @@ class Roda
           if type.is_a?(Array)
             type.any?{|t| match_method(t)}
           else
-            type.to_s.upcase == @env[REQUEST_METHOD]
+            type.to_s.upcase == verb
           end
         end
       end
