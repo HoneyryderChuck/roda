@@ -26,16 +26,40 @@ class Roda
           rack_request = ::Rack::Request.new(env)
           super(rack_request)
         end
+
+
+        # The environment hash for the current request. Example:
+        #
+        #   env['REQUEST_METHOD'] # => 'GET'
+        def env
+          @_request.env
+        end
+
       end
 
       module RequestMethods
        extend Forwardable
+       SCRIPT_NAME = "SCRIPT_NAME".freeze
+       PATH_INFO = "PATH_INFO".freeze
+       SESSION_KEY = 'rack.session'.freeze
 
        def_delegators :@__request, :path, :get?, :post?, :delete?, :head?,
                       :options?, :link?, :patch?, :put?, :trace?, :unlink?, :path,
                       :path_info, :path_info=, :script_name, :script_name=,
                       :host_with_port, :content_type, :user_agent, :host,
                       :get_header, :ssl?, :scheme, :port, :logger, :referrer
+
+        # This an an optimized version of Rack::Request#path.
+        #
+        #   r.env['SCRIPT_NAME'] = '/foo'
+        #   r.env['PATH_INFO'] = '/bar'
+        #   r.path
+        #   # => '/foo/bar'
+        def path
+          e = env
+          "#{e[SCRIPT_NAME]}#{e[PATH_INFO]}"
+        end
+
 
        def version
          env["HTTP_VERSION"]
@@ -69,7 +93,7 @@ class Roda
         # The session for the current request.  Raises a RodaError if
         # a session handler has not been loaded.
        def session
-         env[::Rack::RACK_SESSION] || raise(RodaError, "You're missing a session handler. You can get started by adding use Rack::Session::Cookie")
+         env[SESSION_KEY] || raise(RodaError, "You're missing a session handler. You can get started by adding use Rack::Session::Cookie")
        end
 
        def env

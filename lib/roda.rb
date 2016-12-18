@@ -234,13 +234,6 @@ class Roda
           end
         end
 
-        # The environment hash for the current request. Example:
-        #
-        #   env['REQUEST_METHOD'] # => 'GET'
-        def env
-          @_request.env
-        end
-
         # The class-level options hash.  This should probably not be
         # modified at the instance level. Example:
         #
@@ -310,16 +303,11 @@ class Roda
       # Instance methods for RodaRequest, mostly related to handling routing
       # for the request.
       module RequestMethods
-        PATH_INFO = "PATH_INFO".freeze
-        SCRIPT_NAME = "SCRIPT_NAME".freeze
-        REQUEST_METHOD = "REQUEST_METHOD".freeze
         EMPTY_STRING = "".freeze
         SLASH = "/".freeze
         COLON = ":".freeze
         SEGMENT = "([^\\/]+)".freeze
         TERM_INSPECT = "TERM".freeze
-        GET_REQUEST_METHOD = 'GET'.freeze
-        SESSION_KEY = 'rack.session'.freeze
 
         TERM = Object.new
         def TERM.inspect
@@ -436,13 +424,6 @@ class Roda
           end
         end
 
-        # Optimized method for whether this request is a +GET+ request.
-        # Similar to the default Rack::Request get? method, but can be
-        # overridden without changing rack's behavior.
-        #def is_get?
-        #  verb == GET_REQUEST_METHOD
-        #end
-
         # Does a match on the path, matching only if the arguments
         # have matched the path.  Because this doesn't fully match the
         # path, this is usually used to setup branches of the routing tree,
@@ -481,17 +462,6 @@ class Roda
         # The already matched part of the path, including the original SCRIPT_NAME.
         def matched_path
           path.chomp(@remaining_path)
-        end
-
-        # This an an optimized version of Rack::Request#path.
-        #
-        #   r.env['SCRIPT_NAME'] = '/foo'
-        #   r.env['PATH_INFO'] = '/bar'
-        #   r.path
-        #   # => '/foo/bar'
-        def path
-          e = @env
-          "#{e[SCRIPT_NAME]}#{e[PATH_INFO]}"
         end
 
         # The current path to match requests against.
