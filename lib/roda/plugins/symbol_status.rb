@@ -16,11 +16,22 @@ class Roda
     #
     # The conversion is done through <tt>Rack::Utils.status_code</tt>.
     module SymbolStatus
+
       module ResponseMethods
         # Sets the response status code by fixnum or symbol name
         def status=(code)
-          code = Rack::Utils.status_code(code) if code.is_a?(Symbol)
+          code = resolve_status_code(code) if code.is_a?(Symbol)
           super(code)
+        end
+
+        private
+
+        def resolve_status_code(code)
+          if defined?(::Rack)
+            ::Rack::Utils.status_code(code)
+          else
+            WEBrick::HTTPStatus::StatusMessage[code]
+          end
         end
       end
     end

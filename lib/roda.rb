@@ -1009,4 +1009,6 @@ class Roda
 
   extend RodaPlugins::Base::ClassMethods
   plugin RodaPlugins::Base
+
+  plugin :rack
 end

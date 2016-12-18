@@ -34,17 +34,17 @@ class Roda
     module IndifferentParams
       INDIFFERENT_PROC = lambda{|h,k| h[k.to_s] if k.is_a?(Symbol)}
 
-      if Rack.release > '2'
+      if defined?(::Rack) and ::Rack.release > '2'
         # :nocov:
-        class QueryParser < Rack::QueryParser
+        class QueryParser < ::Rack::QueryParser
           # Work around for invalid optimization in rack
           def parse_nested_query(qs, d=nil)
             return make_params.to_params_hash if qs.nil? || qs.empty?
             super
           end
           
-          class Params < Rack::QueryParser::Params
-            def initialize(limit = Rack::Utils.key_space_limit)
+          class Params < ::Rack::QueryParser::Params
+            def initialize(limit = ::Rack::Utils.key_space_limit)
               @limit  = limit
               @size   = 0
               @params = Hash.new(&INDIFFERENT_PROC)
@@ -54,7 +54,7 @@ class Roda
         end
 
         module RequestMethods
-          QUERY_PARSER = Rack::Utils.default_query_parser = QueryParser.new(QueryParser::Params, 65536, 100)
+          QUERY_PARSER = ::Rack::Utils.default_query_parser = QueryParser.new(QueryParser::Params, 65536, 100)
 
           def query_parser
             QUERY_PARSER

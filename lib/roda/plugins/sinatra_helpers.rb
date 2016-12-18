@@ -340,7 +340,7 @@ class Roda
           end
 
           file = ::Rack::File.new nil
-          s, h, b = if Rack.release > '2'
+          s, h, b = if ::Rack.release > '2'
             # :nocov:
             file.serving(self, path)
             # :nocov:
@@ -503,9 +503,9 @@ class Roda
           return type.to_s if type.to_s.include?(SLASH)
           type = ".#{type}" unless type.to_s[0] == ?.
           if value
-            Rack::Mime::MIME_TYPES[type] = value
+            ::Rack::Mime::MIME_TYPES[type] = value
           else
-            Rack::Mime.mime_type(type, nil)
+            ::Rack::Mime.mime_type(type, nil)
           end
         end
       end
