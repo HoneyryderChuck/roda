@@ -328,7 +328,7 @@ class Roda
           @scope = scope
           @captures = []
           @remaining_path = _remaining_path(request)
-          @__request = request
+          @_request = request
         end
 
         # Handle match block return values.  By default, if a string is given
@@ -588,7 +588,7 @@ class Roda
         # before dispatching to another rack app, so the app still works as
         # a URL mapper.
         def run(app)
-          e = @__request.env
+          e = @_request.env
           path = real_remaining_path
           script_name = script_name()
           path_info = path_info()

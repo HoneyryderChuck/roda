@@ -43,7 +43,7 @@ class Roda
        PATH_INFO = "PATH_INFO".freeze
        SESSION_KEY = 'rack.session'.freeze
 
-       def_delegators :@__request, :path, :get?, :post?, :delete?, :head?,
+       def_delegators :@_request, :path, :get?, :post?, :delete?, :head?,
                       :options?, :link?, :patch?, :put?, :trace?, :unlink?, :path,
                       :path_info, :path_info=, :script_name, :script_name=,
                       :host_with_port, :content_type, :user_agent, :host,
@@ -66,11 +66,11 @@ class Roda
        end
 
        def verb
-         @__request.request_method
+         @_request.request_method
        end
 
        def accept
-         @__request.get_header("HTTP_ACCEPT")
+         @_request.get_header("HTTP_ACCEPT")
        end
 
        def accepts?(mimetype)
@@ -79,7 +79,7 @@ class Roda
 
        def params
          @params ||= begin
-           @__request.GET.merge(post_params)
+           @_request.GET.merge(post_params)
          rescue EOFError
            self.GET.dup
          end
@@ -97,12 +97,12 @@ class Roda
        end
 
        def env
-         @__request.env
+         @_request.env
        end
 
 
        def post_params
-         @__request.POST
+         @_request.POST
        end
       end
     end
