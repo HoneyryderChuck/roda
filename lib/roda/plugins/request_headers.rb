@@ -30,7 +30,7 @@ class Roda
       module RequestMethods
         # Provide access to the request headers while normalising indexes.
         def headers
-          @request_headers ||= Headers.new(@env)
+          @request_headers ||= Headers.new(env)
         end
       end
 
