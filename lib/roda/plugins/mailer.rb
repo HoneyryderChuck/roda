@@ -161,9 +161,9 @@ class Roda
         # the request.  This yields any of the captures to the block, as well as
         # any arguments passed to the +mail+ or +sendmail+ Roda class methods.
         def mail(*args)
-          if @env[REQUEST_METHOD] == MAIL
+          if verb == MAIL
             if_match(args) do |*vs|
-              yield(*(vs + @env[RODA_MAIL_ARGS]))
+              yield(*(vs + env[RODA_MAIL_ARGS]))
             end
           end
         end

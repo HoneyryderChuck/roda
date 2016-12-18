@@ -135,7 +135,7 @@ class Roda
 
           if (!status || (status >= 200 && status < 300) || status == 304)
             if etag_matches?(e[HTTP_IF_NONE_MATCH], etag, new_resource)
-              res.status = (request_method =~ /\AGET|HEAD|OPTIONS|TRACE\z/i ? 304 : 412)
+              res.status = (verb =~ /\AGET|HEAD|OPTIONS|TRACE\z/i ? 304 : 412)
               halt
             end
 
