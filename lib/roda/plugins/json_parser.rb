@@ -12,9 +12,6 @@ class Roda
     # header for the request includes "json".
     module JsonParser
       OPTS = {}.freeze
-      JSON_PARAMS_KEY = "roda.json_params".freeze
-      INPUT_KEY = "rack.input".freeze
-      FORM_HASH_KEY = "rack.request.form_hash".freeze
       FORM_INPUT_KEY = "rack.request.form_input".freeze
       DEFAULT_ERROR_HANDLER = proc{|r| r.halt [400, {}, []]}
       DEFAULT_PARSER = JSON.method(:parse)
@@ -40,26 +37,28 @@ class Roda
 
         # If the Content-Type header in the request includes "json",
         # parse the request body as JSON.  Ignore an empty request body.
-        def post_params 
-          if post_params = (env[JSON_PARAMS_KEY] || env[FORM_HASH_KEY])
-            post_params
-          elsif (input = env[INPUT_KEY]) && content_type =~ /json/
-            str = input.read
-            input.rewind
-            return super if str.empty?
-            begin
-              json_params = env[JSON_PARAMS_KEY] = parse_json(str)
-            rescue
-              roda_class.opts[:json_parser_error_handler].call(self)
-            end
-            env[FORM_INPUT_KEY] = input
-            json_params
-          else
-            super
-          end
+        def post_params
+          json_params || super 
         end
 
         private
+
+        def json_params
+          return @json_params if defined?(@json_params)
+
+          @json_params = if (input = body) && content_type =~ /json/
+            str = input.read
+            input.rewind
+            return nil if str.empty?
+            begin
+              json_params = parse_json(str)
+            rescue
+              roda_class.opts[:json_parser_error_handler].call(self)
+            end
+            env[FORM_INPUT_KEY] = input # TODO: is this really necessary?
+            json_params
+          end
+        end
 
         def parse_json(str)
           args = [str]
