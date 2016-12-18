@@ -69,7 +69,7 @@ class Roda
             key = "HTTP_#{key}"
           end
 
-          if v = @env[key]
+          if v = env[key]
             @captures << v
           end
         end
