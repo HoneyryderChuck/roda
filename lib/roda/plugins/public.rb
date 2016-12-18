@@ -22,6 +22,7 @@ class Roda
     #   plugin :public, :root=>'static'
     module Public
       NULL_BYTE = "\0".freeze
+      GZIP = "gzip".freeze
       SPLIT = Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact)
       PARSER = RUBY_VERSION >= '1.9' ? URI::DEFAULT_PARSER : URI
 
@@ -48,7 +49,7 @@ class Roda
             server = roda_opts[:public_server]
             path = ::File.join(server.root, *public_path_segments(path))
 
-            if roda_opts[:public_gzip] && env['HTTP_ACCEPT_ENCODING'] =~ /\bgzip\b/
+            if roda_opts[:public_gzip] && accept_encoding.one? { |k, v| k == GZIP }
               gzip_path = path + '.gz'
 
               if public_file_readable?(gzip_path)

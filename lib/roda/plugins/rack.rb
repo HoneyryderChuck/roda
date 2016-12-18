@@ -47,7 +47,8 @@ class Roda
                       :options?, :link?, :patch?, :put?, :trace?, :unlink?, :path,
                       :path_info, :path_info=, :script_name, :script_name=,
                       :host_with_port, :content_type, :user_agent, :host,
-                      :get_header, :ssl?, :scheme, :port, :logger, :referrer, :body
+                      :get_header, :ssl?, :scheme, :port, :logger, :referrer, :body,
+                      :accept_encoding
 
         # This an an optimized version of Rack::Request#path.
         #
