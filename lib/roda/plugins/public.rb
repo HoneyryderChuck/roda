@@ -40,7 +40,7 @@ class Roda
       module RequestMethods
         # Serve files from the public directory if the file exists and this is a GET request.
         def public
-          if is_get?
+          if get?
             path = PARSER.unescape(real_remaining_path)
             return if path.include?(NULL_BYTE)
 

@@ -385,7 +385,7 @@ class Roda
 
         # Use a 303 response for non-GET responses if client uses HTTP 1.1.
         def default_redirect_status
-          if @env[HTTP_VERSION] == HTTP11 && !is_get?
+          if version == HTTP11 && !get?
             303
           else
             super

@@ -39,7 +39,7 @@ class Roda
         # the remaining path is +/+.
         def root(&block)
           super
-          if remaining_path == EMPTY_STRING && is_get?
+          if remaining_path == EMPTY_STRING && get?
             always(&block)
           end
         end

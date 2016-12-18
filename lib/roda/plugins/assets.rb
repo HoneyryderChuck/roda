@@ -796,7 +796,7 @@ class Roda
       module RequestMethods
         # Render the matching asset if this is a GET request for a supported asset.
         def assets
-          if is_get?
+          if get?
             self.class.assets_matchers.each do |type, matcher|
               is matcher do |file|
                 scope.render_asset(file, type)

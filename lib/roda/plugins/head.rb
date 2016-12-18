@@ -52,7 +52,7 @@ class Roda
 
       module RequestMethods
         # Consider HEAD requests as GET requests.
-        def is_get?
+        def get?
           super || head?
         end
 
