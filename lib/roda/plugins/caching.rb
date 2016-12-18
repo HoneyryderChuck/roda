@@ -73,10 +73,6 @@ class Roda
 
       module RequestMethods
         LAST_MODIFIED = 'Last-Modified'.freeze
-        HTTP_IF_NONE_MATCH = 'HTTP_IF_NONE_MATCH'.freeze
-        HTTP_IF_MATCH = 'HTTP_IF_MATCH'.freeze
-        HTTP_IF_MODIFIED_SINCE = 'HTTP_IF_MODIFIED_SINCE'.freeze
-        HTTP_IF_UNMODIFIED_SINCE = 'HTTP_IF_UNMODIFIED_SINCE'.freeze
         ETAG = 'ETag'.freeze
         STAR = '*'.freeze
 
@@ -93,17 +89,16 @@ class Roda
         def last_modified(time)
           return unless time
           res = response
-          e = env
           res[LAST_MODIFIED] = time.httpdate
-          return if e[HTTP_IF_NONE_MATCH]
+          return if if_none_match
           status = res.status
 
-          if (!status || status == 200) && (ims = time_from_header(e[HTTP_IF_MODIFIED_SINCE])) && ims >= time.to_i
+          if (!status || status == 200) && (ims = time_from_header(modified_since)) && ims >= time.to_i
             res.status = 304
             halt
           end
 
-          if (!status || (status >= 200 && status < 300) || status == 412) && (ius = time_from_header(e[HTTP_IF_UNMODIFIED_SINCE])) && ius < time.to_i
+          if (!status || (status >= 200 && status < 300) || status == 412) && (ius = time_from_header(unmodified_since)) && ius < time.to_i
             res.status = 412
             halt
           end
@@ -129,17 +124,16 @@ class Roda
           new_resource = opts.fetch(:new_resource){post?}
 
           res = response
-          e = env
           res[ETAG] = etag = "#{'W/' if weak}\"#{value}\""
           status = res.status
 
           if (!status || (status >= 200 && status < 300) || status == 304)
-            if etag_matches?(e[HTTP_IF_NONE_MATCH], etag, new_resource)
+            if etag_matches?(if_none_match, etag, new_resource)
               res.status = (verb =~ /\AGET|HEAD|OPTIONS|TRACE\z/i ? 304 : 412)
               halt
             end
 
-            if ifm = e[HTTP_IF_MATCH]
+            if ifm = if_matchh
               unless etag_matches?(ifm, etag, new_resource)
                 res.status = 412
                 halt

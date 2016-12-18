@@ -42,6 +42,10 @@ class Roda
        SCRIPT_NAME = "SCRIPT_NAME".freeze
        PATH_INFO = "PATH_INFO".freeze
        SESSION_KEY = 'rack.session'.freeze
+       HTTP_IF_NONE_MATCH = 'HTTP_IF_NONE_MATCH'.freeze
+       HTTP_IF_MATCH = 'HTTP_IF_MATCH'.freeze
+       HTTP_IF_MODIFIED_SINCE = 'HTTP_IF_MODIFIED_SINCE'.freeze
+       HTTP_IF_UNMODIFIED_SINCE = 'HTTP_IF_UNMODIFIED_SINCE'.freeze
 
        def_delegators :@_request, :path, :get?, :post?, :delete?, :head?,
                       :options?, :link?, :patch?, :put?, :trace?, :unlink?, :path,
@@ -104,6 +108,26 @@ class Roda
 
        def post_params
          @_request.POST
+       end
+
+       # CACHE HELPERS
+
+       # this name sucks, but roda already defines a name like that(??)
+       # TODO: rename the roda name, as it's private API and it could be done?
+       def if_matchh
+         get_header(HTTP_IF_MATCH)
+       end
+
+       def if_none_match
+         get_header(HTTP_IF_NONE_MATCH)
+       end
+
+       def modified_since
+         get_header(HTTP_IF_MODIFIED_SINCE)
+       end
+
+       def unmodified_since
+         get_header(HTTP_IF_UNMODIFIED_SINCE)
        end
       end
     end

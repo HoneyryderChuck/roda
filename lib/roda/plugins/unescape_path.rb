@@ -21,7 +21,7 @@ class Roda
         private
 
         # Unescape the path.
-        def _remaining_path(env)
+        def _remaining_path(*)
           ::Rack::Utils.unescape(super)
         end
       end
