@@ -86,7 +86,7 @@ class Roda
       module RequestMethods
         # Rewrite remaining_path and/or PATH_INFO based on the path rewrites.
         def initialize(scope, request)
-          path_info = request.env[PATH_INFO]
+          path_info = request.path_info
 
           rewrite_path(scope.class.opts[:path_info_rewrites], path_info)
           super

@@ -15,7 +15,6 @@ class Roda
     #   plugin :heartbeat, :path=>'/status'
     module Heartbeat
       OPTS = {}.freeze
-      PATH_INFO = 'PATH_INFO'.freeze
       HEARTBEAT_RESPONSE = [200, {'Content-Type'=>'text/plain'}.freeze, ['OK'.freeze].freeze].freeze
 
       # Set the heartbeat path to the given path.
@@ -26,7 +25,7 @@ class Roda
       module InstanceMethods
         # If the request is for a heartbeat path, return the heartbeat response.
         def call
-          if env[PATH_INFO] == opts[:heartbeat_path]
+          if request.path_info == opts[:heartbeat_path]
             response = HEARTBEAT_RESPONSE.dup
             response[1] = Hash[response[1]]
             response

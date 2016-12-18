@@ -49,7 +49,7 @@ class Roda
             server = roda_opts[:public_server]
             path = ::File.join(server.root, *public_path_segments(path))
 
-            if roda_opts[:public_gzip] && accept_encoding.one? { |k, v| k == GZIP }
+            if roda_opts[:public_gzip] && accept_encoding.one? { |k, _| k == GZIP }
               gzip_path = path + '.gz'
 
               if public_file_readable?(gzip_path)

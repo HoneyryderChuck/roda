@@ -676,7 +676,7 @@ class Roda
           if o[:compiled]
             file = "#{o[:"compiled_#{type}_path"]}#{file}"
 
-            if o[:gzip] && env[HTTP_ACCEPT_ENCODING] =~ /\bgzip\b/
+            if o[:gzip] && request.accept_encoding.one? { |k, _| k == GZIP }
               @_response[CONTENT_ENCODING] = GZIP
               file += DOTGZ
             end
