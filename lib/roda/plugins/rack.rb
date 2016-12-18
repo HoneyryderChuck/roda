@@ -34,7 +34,7 @@ class Roda
        def_delegators :@__request, :path, :get?, :post?, :delete?, :head?,
                       :options?, :link?, :patch?, :put?, :trace?, :unlink?, :path,
                       :path_info, :path_info=, :script_name, :script_name=,
-                      :host_with_port, :params, :[], :content_type, :user_agent, :host,
+                      :host_with_port, :content_type, :user_agent, :host,
                       :get_header, :ssl?, :scheme, :port, :logger, :referrer
 
        def version
@@ -53,6 +53,19 @@ class Roda
          accept.to_s.split(',').any?{|s| s.strip == mimetype}
        end
 
+       def params
+         @params ||= begin
+           @__request.GET.merge(post_params)
+         rescue EOFError
+           self.GET.dup
+         end
+       end
+
+       def [](k)
+         # TODO: this was being redirected to rack request, but this method is deprecated
+         params[k.to_s]
+       end
+
         # The session for the current request.  Raises a RodaError if
         # a session handler has not been loaded.
        def session
@@ -63,6 +76,10 @@ class Roda
          @__request.env
        end
 
+
+       def post_params
+         @__request.POST
+       end
       end
     end
 

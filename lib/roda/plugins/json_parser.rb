@@ -37,10 +37,10 @@ class Roda
       end
 
       module RequestMethods
+
         # If the Content-Type header in the request includes "json",
         # parse the request body as JSON.  Ignore an empty request body.
-        def POST
-          env = @env
+        def post_params 
           if post_params = (env[JSON_PARAMS_KEY] || env[FORM_HASH_KEY])
             post_params
           elsif (input = env[INPUT_KEY]) && content_type =~ /json/
