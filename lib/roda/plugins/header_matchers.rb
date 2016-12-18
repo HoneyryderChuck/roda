@@ -56,7 +56,7 @@ class Roda
 
         # Match if the given mimetype is one of the accepted mimetypes.
         def match_accept(mimetype)
-          if @env["HTTP_ACCEPT"].to_s.split(',').any?{|s| s.strip == mimetype}
+          if accepts?(mimetype)
             response["Content-Type"] = mimetype
           end
         end
@@ -89,7 +89,7 @@ class Roda
         # Match the submitted user agent to the given pattern, capturing any
         # regexp match groups.
         def match_user_agent(pattern)
-          if (user_agent = @env["HTTP_USER_AGENT"]) && user_agent.to_s =~ pattern
+          if user_agent.to_s =~ pattern
             @captures.concat($~[1..-1])
           end
         end

@@ -365,12 +365,8 @@ class Roda
           addr = addr.to_s if addr
           return addr if addr =~ /\A[A-z][A-z0-9\+\.\-]*:/
           uri = if absolute
-            h = if @env.has_key?(HTTP_X_FORWARDED_HOST) || port != (ssl? ? 443 : 80)
-              host_with_port
-            else
-              host
-            end
-            ["http#{'s' if ssl?}://#{h}"]
+            h = URI.parse(host_with_port)
+            [URI.parse("http#{'s' if ssl?}://#{h}").to_s]
           else
             [EMPTY_STRING]
           end

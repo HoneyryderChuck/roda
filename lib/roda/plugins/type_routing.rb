@@ -169,11 +169,12 @@ class Roda
           end
         end
 
+        
         private
 
         # Removes a trailing file extension from the path, and sets
         # the requested type if so.
-        def _remaining_path(env)
+        def _remaining_path(*)
           opts = scope.opts[:type_routing]
           path = super
 
@@ -191,7 +192,7 @@ class Roda
         def accept_response_type
           mimes = @scope.opts[:type_routing][:mimes]
 
-          @env[ACCEPT_HEADER].to_s.split(/\s*,\s*/).map do |part|
+          accept.to_s.split(/\s*,\s*/).map do |part|
             mime, _= part.split(/\s*;\s*/, 2)
             if sym = mimes[mime]
               return sym
